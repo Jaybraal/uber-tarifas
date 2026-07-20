@@ -15,14 +15,19 @@ function cargarConfig() {
         // RD$10/km, RD$4/min, RD$85 minima) ajustada por inflacion acumulada RD
         // 2018-2026 (~50%, Banco Central). No es un dato verificado de hoy: Uber ya
         // no publica tarifas fijas. Corregir en cuanto haya viajes reales.
-        tarifaBase: 52.5,
-        costoPorKm: 15,
-        costoPorMinuto: 6,
-        tarifaMinima: 128,
+        // Sobre la base ajustada por inflacion, se sube el costo por km (no el
+        // por minuto: el desgaste de gomas/mantenimiento/limpieza depende de la
+        // distancia recorrida, no del tiempo parado en trafico) y se agrega un
+        // rubro explicito de mantenimiento por km para que la ganancia real lo
+        // refleje, no solo el combustible.
+        tarifaBase: 60,
+        costoPorKm: 20,
+        costoPorMinuto: 7,
+        tarifaMinima: 145,
         comisionPct: 0,
         precioPorGalon: 338.1,
         rendimientoKmPorGalon: 68,
-        otrosGastosPorKm: 0,
+        otrosGastosPorKm: 4,
       };
 }
 
@@ -225,6 +230,17 @@ function etiquetaCorta(displayName) {
   return displayName.split(',').slice(0, 2).join(',');
 }
 
+function escapeHtml(s) {
+  const div = document.createElement('div');
+  div.textContent = s;
+  return div.innerHTML;
+}
+
+function marcarSeleccion(inputId, checkId, activo) {
+  $(inputId).classList.toggle('seleccionado', activo);
+  $(checkId).classList.toggle('visible', activo);
+}
+
 function renderSugerencias(listId, resultados, inputEl, onSeleccionar) {
   const ul = $(listId);
   if (!resultados.length) {
@@ -232,7 +248,14 @@ function renderSugerencias(listId, resultados, inputEl, onSeleccionar) {
     ul.innerHTML = '';
     return;
   }
-  ul.innerHTML = resultados.map((r, i) => `<li data-i="${i}">${r.displayName}</li>`).join('');
+  ul.innerHTML = resultados
+    .map((r, i) => {
+      const partes = r.displayName.split(',').map((p) => p.trim());
+      const principal = escapeHtml(partes[0]);
+      const secundaria = escapeHtml(partes.slice(1, 4).join(', '));
+      return `<li data-i="${i}"><span class="sug-pin">📍</span><span class="sug-texto"><strong>${principal}</strong><small>${secundaria}</small></span></li>`;
+    })
+    .join('');
   ul.classList.remove('hidden');
   ul.querySelectorAll('li').forEach((li) => {
     li.addEventListener('click', () => {
@@ -269,9 +292,11 @@ function attachAutocomplete(inputId, listId, onSeleccionar) {
 
 attachAutocomplete('ruta-origen', 'sug-origen', (sel) => {
   origenSeleccionado = sel;
+  marcarSeleccion('ruta-origen', 'check-origen', Boolean(sel));
 });
 attachAutocomplete('ruta-destino', 'sug-destino', (sel) => {
   destinoSeleccionado = sel;
+  marcarSeleccion('ruta-destino', 'check-destino', Boolean(sel));
 });
 
 $('btn-usar-ubicacion').addEventListener('click', () => {
@@ -295,6 +320,7 @@ $('btn-usar-ubicacion').addEventListener('click', () => {
         $('ruta-origen').value = 'Mi ubicación actual (GPS)';
         origenSeleccionado = { lat, lon, displayName: 'Mi ubicación actual' };
       }
+      marcarSeleccion('ruta-origen', 'check-origen', true);
       $('sug-origen').classList.add('hidden');
       btn.disabled = false;
       btn.textContent = '📍';

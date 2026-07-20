@@ -13,6 +13,10 @@
   box-sizing: border-box;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   margin: 0;
   background: var(--bg);
@@ -28,6 +32,35 @@ body {
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+/* Pantallas chicas (celulares angostos): menos padding, tarifa en una sola columna */
+@media (max-width: 380px) {
+  .app {
+    padding: 12px 12px 40px;
+    gap: 12px;
+  }
+
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Pantallas grandes (tablet/desktop): la app se usa sobre todo en el celular,
+   pero que no se vea como una columna perdida en medio de la pantalla */
+@media (min-width: 640px) {
+  body {
+    background: #050505;
+  }
+
+  .app {
+    max-width: 520px;
+    margin: 32px auto;
+    padding: 24px 24px 56px;
+    background: var(--bg);
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  }
 }
 
 .topbar {
@@ -101,6 +134,40 @@ input:focus {
   outline-offset: -1px;
 }
 
+input.seleccionado {
+  border-color: var(--accent);
+  background: #0f1a13;
+  padding-right: 34px;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.input-with-check {
+  position: relative;
+  flex: 1;
+  display: flex;
+}
+
+.input-with-check input {
+  width: 100%;
+}
+
+.check-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%) scale(0.5);
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 1.1rem;
+  opacity: 0;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.check-icon.visible {
+  opacity: 1;
+  transform: translateY(-50%) scale(1);
+}
+
 .grid-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -168,10 +235,30 @@ input:focus {
 }
 
 .sugerencias li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
   padding: 12px;
-  font-size: 0.85rem;
   border-bottom: 1px solid var(--border);
   cursor: pointer;
+  transition: background-color 0.15s;
+  animation: sug-in 0.18s ease backwards;
+}
+
+.sugerencias li:nth-child(2) { animation-delay: 0.02s; }
+.sugerencias li:nth-child(3) { animation-delay: 0.04s; }
+.sugerencias li:nth-child(4) { animation-delay: 0.06s; }
+.sugerencias li:nth-child(5) { animation-delay: 0.08s; }
+
+@keyframes sug-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .sugerencias li:last-child {
@@ -181,6 +268,33 @@ input:focus {
 .sugerencias li:active,
 .sugerencias li:hover {
   background: #1a1a1a;
+}
+
+.sug-pin {
+  flex-shrink: 0;
+  font-size: 1rem;
+  line-height: 1.3;
+}
+
+.sug-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sug-texto strong {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.sug-texto small {
+  color: var(--muted);
+  font-size: 0.75rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .mapa {
