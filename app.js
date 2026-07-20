@@ -19,7 +19,7 @@ function cargarConfig() {
         costoPorKm: 15,
         costoPorMinuto: 6,
         tarifaMinima: 128,
-        comisionPct: 35,
+        comisionPct: 0,
         precioPorGalon: 338.1,
         rendimientoKmPorGalon: 68,
         otrosGastosPorKm: 0,
@@ -142,8 +142,16 @@ function mostrarResultado({ km, minutos }) {
   $('r-km').textContent = `${km.toFixed(2)} km`;
   $('r-min').textContent = `${minutos.toFixed(1)} min`;
   $('r-precio').textContent = formatoRD(r.precio);
-  $('r-comision').textContent = formatoRD(r.comision);
-  $('r-neto').textContent = formatoRD(r.neto);
+
+  if (config.comisionPct > 0) {
+    $('r-comision').textContent = formatoRD(r.comision);
+    $('r-neto').textContent = formatoRD(r.neto);
+    $('r-comision-row').classList.remove('hidden');
+    $('r-neto-row').classList.remove('hidden');
+  } else {
+    $('r-comision-row').classList.add('hidden');
+    $('r-neto-row').classList.add('hidden');
+  }
 
   let gastoOperativo = null;
   let real = null;

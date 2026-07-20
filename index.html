@@ -21,15 +21,14 @@
     <section id="panel-config" class="card panel-config hidden">
       <h2>Tu tarifa</h2>
       <p class="hint">
-        Ya dejé una tarifa de partida calculada (no inventada al azar): tomé la última
-        tarifa oficial que Uber publicó para Santo Domingo (marzo 2018: RD$35 base,
-        RD$10/km, RD$4/min, RD$85 mínima) y la ajusté por la inflación real acumulada en
-        RD desde entonces (~50%, según el Banco Central). La comisión (35%) es un punto
-        medio entre lo que Uber dice cobrar (~25%) y lo que conductores dominicanos
-        reportan pagar en la práctica (hasta 45-50%) — ninguna de las dos está confirmada
-        oficialmente. <strong>Es un estimado para arrancar, no un dato exacto.</strong>
-        En cuanto termines tu primer viaje real, abrí el recibo en la app de conductor y
-        corregí estos campos con los números verdaderos — se guardan solo en este celular.
+        Como cobrás directo al pasajero por WhatsApp (sin pasar por la plataforma de Uber),
+        lo que calcules acá es 100% tuyo — dejé la comisión en 0%. La tarifa (base + km +
+        minuto + mínima) es la que usás para cotizar: dejé precargada la última tarifa
+        oficial que Uber publicó para Santo Domingo (marzo 2018) ajustada por la inflación
+        real acumulada en RD desde entonces (~50%, Banco Central), como referencia para
+        quedar competitivo con lo que cobraría Uber. <strong>Es un punto de partida, no un
+        precio fijo</strong> — ajustalo a lo que vos quieras cobrar. Se guarda solo en este
+        celular.
       </p>
       <div class="grid-2">
         <label>Tarifa base (RD$)
@@ -44,7 +43,7 @@
         <label>Tarifa mínima (RD$)
           <input type="number" id="cfg-minima" min="0" step="0.01" inputmode="decimal" />
         </label>
-        <label>Comisión de Uber (%)
+        <label>Comisión de plataforma (%, solo si aplica)
           <input type="number" id="cfg-comision" min="0" max="100" step="0.1" inputmode="decimal" />
         </label>
       </div>
@@ -84,24 +83,16 @@
     </section>
 
     <nav class="tabs" role="tablist">
-      <button class="tab active" data-tab="gps" role="tab">GPS en vivo</button>
-      <button class="tab" data-tab="ruta" role="tab">Origen → Destino</button>
+      <button class="tab active" data-tab="ruta" role="tab">Origen → Destino</button>
+      <button class="tab" data-tab="gps" role="tab">GPS en vivo</button>
       <button class="tab" data-tab="manual" role="tab">Km manual</button>
     </nav>
 
-    <section class="card tab-panel" data-panel="gps">
-      <p class="hint">Iniciá el viaje cuando recojas al pasajero. La distancia se mide con el GPS del celular.</p>
-      <div class="live-stats">
-        <div><span id="gps-km">0.00</span><small>km</small></div>
-        <div><span id="gps-min">0.0</span><small>min</small></div>
-        <div><span id="gps-precio">RD$0.00</span><small>estimado</small></div>
-      </div>
-      <button id="btn-gps-start" class="btn-primary">Iniciar viaje</button>
-      <button id="btn-gps-stop" class="btn-danger hidden">Finalizar viaje</button>
-      <p id="gps-msg" class="msg"></p>
-    </section>
-
-    <section class="card tab-panel hidden" data-panel="ruta">
+    <section class="card tab-panel" data-panel="ruta">
+      <p class="hint">
+        El pasajero te dice por WhatsApp de dónde a dónde. Poné las dos direcciones,
+        calculás, y le pasás el precio antes de aceptar.
+      </p>
       <label>Origen
         <div class="input-with-button">
           <input type="text" id="ruta-origen" placeholder="Ej. Ágora Mall, Santo Domingo" autocomplete="off" />
@@ -115,9 +106,21 @@
       </label>
       <ul id="sug-destino" class="sugerencias hidden"></ul>
 
-      <button id="btn-ruta-calcular" class="btn-primary">Calcular distancia</button>
+      <button id="btn-ruta-calcular" class="btn-primary">Calcular precio</button>
       <p id="ruta-msg" class="msg"></p>
       <div id="mapa-ruta" class="mapa hidden"></div>
+    </section>
+
+    <section class="card tab-panel hidden" data-panel="gps">
+      <p class="hint">Si preferís medir el viaje ya en curso en vez de cotizarlo antes, iniciá acá. La distancia se mide con el GPS del celular.</p>
+      <div class="live-stats">
+        <div><span id="gps-km">0.00</span><small>km</small></div>
+        <div><span id="gps-min">0.0</span><small>min</small></div>
+        <div><span id="gps-precio">RD$0.00</span><small>estimado</small></div>
+      </div>
+      <button id="btn-gps-start" class="btn-primary">Iniciar viaje</button>
+      <button id="btn-gps-stop" class="btn-danger hidden">Finalizar viaje</button>
+      <p id="gps-msg" class="msg"></p>
     </section>
 
     <section class="card tab-panel hidden" data-panel="manual">
@@ -136,11 +139,11 @@
       <div class="resultado-grid">
         <div><small>Distancia</small><span id="r-km">-</span></div>
         <div><small>Tiempo</small><span id="r-min">-</span></div>
-        <div><small>Precio</small><span id="r-precio">-</span></div>
-        <div><small>Comisión Uber</small><span id="r-comision">-</span></div>
-        <div><small>Ganancia neta (sin gastos)</small><span id="r-neto">-</span></div>
+        <div class="destacado"><small>Precio a cobrarle al pasajero</small><span id="r-precio">-</span></div>
+        <div id="r-comision-row" class="hidden"><small>Comisión de plataforma</small><span id="r-comision">-</span></div>
+        <div id="r-neto-row" class="hidden"><small>Ganancia neta (sin gastos)</small><span id="r-neto">-</span></div>
         <div id="r-gasto-row"><small>Gasto de combustible</small><span id="r-gasto">-</span></div>
-        <div id="r-real-row" class="destacado"><small>Tu ganancia real</small><span id="r-real">-</span></div>
+        <div id="r-real-row"><small>Tu ganancia real</small><span id="r-real">-</span></div>
       </div>
       <button id="btn-guardar-viaje" class="btn-primary">Guardar viaje</button>
     </section>
