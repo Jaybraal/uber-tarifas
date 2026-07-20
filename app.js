@@ -11,11 +11,15 @@ function cargarConfig() {
   return raw
     ? JSON.parse(raw)
     : {
-        tarifaBase: null,
-        costoPorKm: null,
-        costoPorMinuto: 0,
-        tarifaMinima: 0,
-        comisionPct: 0,
+        // Estimado: tarifa oficial de Uber Santo Domingo de marzo 2018 (RD$35 base,
+        // RD$10/km, RD$4/min, RD$85 minima) ajustada por inflacion acumulada RD
+        // 2018-2026 (~50%, Banco Central). No es un dato verificado de hoy: Uber ya
+        // no publica tarifas fijas. Corregir en cuanto haya viajes reales.
+        tarifaBase: 52.5,
+        costoPorKm: 15,
+        costoPorMinuto: 6,
+        tarifaMinima: 128,
+        comisionPct: 35,
         precioPorGalon: 338.1,
         rendimientoKmPorGalon: 68,
         otrosGastosPorKm: 0,
