@@ -20,6 +20,8 @@ function cargarConfig() {
         // distancia recorrida, no del tiempo parado en trafico) y se agrega un
         // rubro explicito de mantenimiento por km para que la ganancia real lo
         // refleje, no solo el combustible.
+        vehiculo: 'Honda Fit Hybrid',
+        placa: '',
         tarifaBase: 60,
         costoPorKm: 20,
         costoPorMinuto: 7,
@@ -39,6 +41,8 @@ let config = cargarConfig();
 let ultimoResultado = null;
 
 function pintarConfigEnFormulario() {
+  $('cfg-vehiculo').value = config.vehiculo ?? '';
+  $('cfg-placa').value = config.placa ?? '';
   $('cfg-base').value = config.tarifaBase ?? '';
   $('cfg-km').value = config.costoPorKm ?? '';
   $('cfg-min').value = config.costoPorMinuto ?? '';
@@ -81,6 +85,8 @@ $('btn-config').addEventListener('click', () => {
 pintarConfigEnFormulario();
 
 $('btn-guardar-config').addEventListener('click', () => {
+  const vehiculo = $('cfg-vehiculo').value.trim();
+  const placa = $('cfg-placa').value.trim();
   const tarifaBase = parseFloat($('cfg-base').value);
   const costoPorKm = parseFloat($('cfg-km').value);
   const costoPorMinuto = parseFloat($('cfg-min').value) || 0;
@@ -99,6 +105,8 @@ $('btn-guardar-config').addEventListener('click', () => {
   }
 
   config = {
+    vehiculo,
+    placa,
     tarifaBase,
     costoPorKm,
     costoPorMinuto,
@@ -453,7 +461,16 @@ $('btn-gps-start').addEventListener('click', () => {
   liveInterval = setInterval(refrescarLive, 1000);
 });
 
-$('btn-gps-stop').addEventListener('click', () => {
+function finalizarTracking(posicionFinal) {
+  if (posicionFinal) {
+    tracker.addPoint({
+      lat: posicionFinal.coords.latitude,
+      lon: posicionFinal.coords.longitude,
+      accuracy: posicionFinal.coords.accuracy,
+      timestamp: posicionFinal.timestamp,
+    });
+  }
+
   if (watchId != null) navigator.geolocation.clearWatch(watchId);
   if (liveInterval != null) clearInterval(liveInterval);
   watchId = null;
@@ -461,12 +478,25 @@ $('btn-gps-stop').addEventListener('click', () => {
 
   $('btn-gps-start').classList.remove('hidden');
   $('btn-gps-stop').classList.add('hidden');
+  $('btn-gps-stop').disabled = false;
   $('gps-msg').textContent = 'Viaje finalizado.';
   $('gps-msg').className = 'msg ok';
 
   const km = tracker.totalKm;
   const minutos = (Date.now() - inicioViaje) / 60000;
   mostrarResultado({ km, minutos });
+}
+
+$('btn-gps-stop').addEventListener('click', () => {
+  $('btn-gps-stop').disabled = true;
+  $('gps-msg').textContent = 'Confirmando la última posición...';
+  $('gps-msg').className = 'msg';
+
+  navigator.geolocation.getCurrentPosition(
+    finalizarTracking,
+    () => finalizarTracking(null),
+    { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 },
+  );
 });
 
 // --- Resumen de hoy ---

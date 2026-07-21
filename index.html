@@ -8,6 +8,9 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="public/icons/icon-192.png" />
   <link rel="icon" href="public/icons/icon-192.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
@@ -49,18 +52,27 @@
       <button id="btn-guardar-config" class="btn-primary">Guardar tarifa</button>
       <p id="config-msg" class="msg"></p>
 
-      <h2 class="section-title">Tu costo real por km</h2>
+      <h2 class="section-title">Tu vehículo</h2>
       <p class="hint">
-        Precio de combustible según el MICM (semana del 18 al 24 de julio de 2026, cambia cada
-        semana, ajustalo acá). Dejé precargado Gasolina Premium (tu carro) y un rendimiento
-        estimado de <strong>18 km/l (~68 km/galón)</strong> para un Honda Fit Hybrid con A/C en
-        Santo Domingo — de fábrica el carro rinde más (27-29 km/l) pero esa cifra es de
-        laboratorio, sin A/C ni tráfico. También dejé RD$4/km en "otros gastos" como estimado
-        de gomas, mantenimiento y limpieza. Son puntos de partida, no datos exactos: la próxima
-        vez que llenes el tanque, dividí los km recorridos entre los galones que le echaste y
-        poné ese número acá para que sea preciso de verdad.
+        Estos datos son los que definen tu costo real por km (combustible + desgaste), para
+        que la ganancia que ves ya sea neta de verdad, no solo el precio bruto. Precio de
+        combustible según el MICM (semana del 18 al 24 de julio de 2026, cambia cada semana,
+        ajustalo acá). Dejé precargado Gasolina Premium y un rendimiento estimado de
+        <strong>18 km/l (~68 km/galón)</strong> para un Honda Fit Hybrid con A/C en Santo
+        Domingo — de fábrica el carro rinde más (27-29 km/l) pero esa cifra es de laboratorio,
+        sin A/C ni tráfico. También dejé RD$4/km en "otros gastos" como estimado de gomas,
+        mantenimiento y limpieza. Son puntos de partida, no datos exactos: la próxima vez que
+        llenes el tanque, dividí los km recorridos entre los galones que le echaste y poné ese
+        número acá para que sea preciso de verdad. Si esta app la usa otra persona, que
+        reemplace estos datos por los de su propio carro.
       </p>
       <div class="grid-2">
+        <label>Marca y modelo (opcional)
+          <input type="text" id="cfg-vehiculo" placeholder="Ej. Honda Fit Hybrid" autocomplete="off" />
+        </label>
+        <label>Placa (opcional)
+          <input type="text" id="cfg-placa" placeholder="Ej. A123456" autocomplete="off" />
+        </label>
         <label>Combustible
           <select id="cfg-combustible">
             <option value="302.50">Gasolina Regular — RD$302.50/gal</option>
