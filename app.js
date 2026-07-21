@@ -62,10 +62,10 @@ function pintarConfigEnFormulario() {
   $('cfg-otro-gasto-monto').value = config.otroGastoPorMes ?? '';
   $('cfg-km-mes').value = config.kmPorMes ?? '';
 
-  const opcionCoincide = Array.from($('cfg-combustible').options).some(
+  const opcionCoincide = Array.from($('cfg-combustible').options).find(
     (o) => o.value !== 'custom' && parseFloat(o.value) === config.precioPorGalon,
   );
-  $('cfg-combustible').value = opcionCoincide ? String(config.precioPorGalon) : 'custom';
+  $('cfg-combustible').value = opcionCoincide ? opcionCoincide.value : 'custom';
 }
 
 $('cfg-combustible').addEventListener('change', () => {
@@ -175,7 +175,13 @@ function calcularYPintarResultado() {
   });
 
   $('r-km').textContent = `${km.toFixed(2)} km`;
-  $('r-min').textContent = `${minutos.toFixed(1)} min`;
+  $('r-min').textContent = `${minutosViaje.toFixed(1)} min`;
+  if (tiempoEsperaMin > 0) {
+    $('r-espera-total').textContent = `${tiempoEsperaMin.toFixed(0)} min`;
+    $('r-espera-row').classList.remove('hidden');
+  } else {
+    $('r-espera-row').classList.add('hidden');
+  }
   $('r-precio').textContent = formatoRD(r.precio);
 
   if (config.comisionPct > 0) {
@@ -254,8 +260,48 @@ $('btn-guardar-viaje').addEventListener('click', () => {
   guardarViaje(localStorage, ultimoResultado);
   ultimoResultado = null;
   resultadoBase = null;
+  resetearBotonDescartar();
   $('panel-resultado').classList.add('hidden');
   pintarResumen();
+});
+
+let descartarTimeout = null;
+
+function resetearBotonDescartar() {
+  clearTimeout(descartarTimeout);
+  descartarTimeout = null;
+  $('btn-descartar-viaje').textContent = 'Descartar';
+  $('btn-descartar-viaje').classList.remove('confirmando');
+}
+
+$('btn-descartar-viaje').addEventListener('click', () => {
+  const boton = $('btn-descartar-viaje');
+
+  if (!boton.classList.contains('confirmando')) {
+    boton.textContent = '¿Seguro? Tocá de nuevo para descartar';
+    boton.classList.add('confirmando');
+    descartarTimeout = setTimeout(resetearBotonDescartar, 4000);
+    return;
+  }
+
+  resetearBotonDescartar();
+  ultimoResultado = null;
+  resultadoBase = null;
+  tiempoEsperaMin = 0;
+  $('panel-resultado').classList.add('hidden');
+
+  origenSeleccionado = null;
+  destinoSeleccionado = null;
+  $('ruta-origen').value = '';
+  $('ruta-destino').value = '';
+  marcarSeleccion('ruta-origen', 'check-origen', false);
+  marcarSeleccion('ruta-destino', 'check-destino', false);
+  $('ruta-msg').textContent = '';
+  $('mapa-ruta').classList.add('hidden');
+
+  $('manual-km').value = '';
+  $('manual-min').value = '';
+  $('manual-msg').textContent = '';
 });
 
 // --- Modo manual ---

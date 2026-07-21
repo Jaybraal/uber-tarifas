@@ -188,7 +188,8 @@
       </label>
       <div class="resultado-grid">
         <div><small>Distancia</small><span id="r-km">-</span></div>
-        <div><small>Tiempo (viaje + espera)</small><span id="r-min">-</span></div>
+        <div><small>Tiempo de viaje</small><span id="r-min">-</span></div>
+        <div id="r-espera-row" class="hidden"><small>Tiempo de espera</small><span id="r-espera-total">-</span></div>
         <div class="destacado"><small>Precio a cobrarle al pasajero</small><span id="r-precio">-</span></div>
         <div id="r-comision-row" class="hidden"><small>Comisión de plataforma</small><span id="r-comision">-</span></div>
         <div id="r-neto-row" class="hidden"><small>Ganancia neta (sin gastos)</small><span id="r-neto">-</span></div>
@@ -196,6 +197,7 @@
         <div id="r-real-row"><small>Tu ganancia real</small><span id="r-real">-</span></div>
       </div>
       <button id="btn-guardar-viaje" class="btn-primary">Guardar viaje</button>
+      <button id="btn-descartar-viaje" class="btn-link btn-descartar">Descartar</button>
     </section>
 
     <section class="card resumen">

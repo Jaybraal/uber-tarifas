@@ -42,18 +42,6 @@ body {
   gap: 16px;
 }
 
-/* Pantallas chicas (celulares angostos): menos padding, tarifa en una sola columna */
-@media (max-width: 380px) {
-  .app {
-    padding: 16px 12px 40px;
-    gap: 12px;
-  }
-
-  .grid-2 {
-    grid-template-columns: 1fr;
-  }
-}
-
 /* Pantallas grandes (tablet/desktop): la app se usa sobre todo en el celular,
    pero que no se vea como una columna perdida en medio de la pantalla */
 @media (min-width: 640px) {
@@ -215,6 +203,20 @@ input.seleccionado {
   min-width: 0;
 }
 
+/* Pantallas chicas (celulares angostos): menos padding, tarifa en una sola columna.
+   Va DESPUES de la regla base de .grid-2 a proposito: con la misma especificidad,
+   la que aparece despues en el archivo gana, sin importar el media query. */
+@media (max-width: 380px) {
+  .app {
+    padding: 16px 12px 40px;
+    gap: 12px;
+  }
+
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
 .btn-primary,
 .btn-danger {
   width: 100%;
@@ -268,6 +270,12 @@ input.seleccionado {
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 2px;
+}
+
+.btn-descartar.confirmando {
+  color: var(--danger);
+  font-weight: 700;
+  text-decoration: none;
 }
 
 .hidden {
