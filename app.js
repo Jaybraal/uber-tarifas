@@ -559,36 +559,44 @@ $('btn-gps-start').addEventListener('click', () => {
   liveInterval = setInterval(refrescarLive, 1000);
 });
 
-function finalizarTracking(posicionFinal) {
-  if (posicionFinal) {
-    tracker.addPoint({
-      lat: posicionFinal.coords.latitude,
-      lon: posicionFinal.coords.longitude,
-      accuracy: posicionFinal.coords.accuracy,
-      timestamp: posicionFinal.timestamp,
-    });
-  }
+$('btn-gps-stop').addEventListener('click', () => {
+  $('btn-gps-stop').disabled = true;
 
+  // Congelar el cronometro en el instante del clic (detener watch/interval
+  // YA, antes de pedir la posicion final): minutos depende de Date.now(), no
+  // del GPS, asi que si se esperara a getCurrentPosition antes de limpiar el
+  // interval, el monto seguiria subiendo durante esa espera (hasta 5s). El
+  // km si puede terminar de confirmarse despues, de forma async, porque sale
+  // de tracker.totalKm y no del reloj.
   if (watchId != null) navigator.geolocation.clearWatch(watchId);
   if (liveInterval != null) clearInterval(liveInterval);
   watchId = null;
   liveInterval = null;
-
-  $('btn-gps-start').classList.remove('hidden');
-  $('btn-gps-stop').classList.add('hidden');
-  $('btn-gps-stop').disabled = false;
-  $('gps-msg').textContent = 'Viaje finalizado.';
-  $('gps-msg').className = 'msg ok';
-
-  const km = tracker.totalKm;
   const minutos = (Date.now() - inicioViaje) / 60000;
-  mostrarResultado({ km, minutos });
-}
 
-$('btn-gps-stop').addEventListener('click', () => {
-  $('btn-gps-stop').disabled = true;
   $('gps-msg').textContent = 'Confirmando la última posición...';
   $('gps-msg').className = 'msg';
+
+  const finalizarTracking = (posicionFinal) => {
+    if (posicionFinal) {
+      tracker.addPoint({
+        lat: posicionFinal.coords.latitude,
+        lon: posicionFinal.coords.longitude,
+        accuracy: posicionFinal.coords.accuracy,
+        timestamp: posicionFinal.timestamp,
+      });
+    }
+
+    const km = tracker.totalKm;
+
+    $('btn-gps-start').classList.remove('hidden');
+    $('btn-gps-stop').classList.add('hidden');
+    $('btn-gps-stop').disabled = false;
+    $('gps-msg').textContent = 'Viaje finalizado.';
+    $('gps-msg').className = 'msg ok';
+
+    mostrarResultado({ km, minutos });
+  };
 
   navigator.geolocation.getCurrentPosition(
     finalizarTracking,
