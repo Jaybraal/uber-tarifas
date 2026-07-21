@@ -1,4 +1,4 @@
-import { calcularPrecio, costoOperativoPorKm, gananciaReal as calcularGananciaReal } from './src/pricing.js';
+import { calcularPrecio, costoOperativoPorKm, costoFijoPorKm, gananciaReal as calcularGananciaReal } from './src/pricing.js';
 import { TripTracker } from './src/distance.js';
 import { guardarViaje, resumenDeHoy, borrarViajes } from './src/tripStore.js';
 import { buscarSugerencias, reverseGeocode, routeDistance } from './src/geocode.js';
@@ -30,6 +30,11 @@ function cargarConfig() {
         precioPorGalon: 338.1,
         rendimientoKmPorGalon: 68,
         otrosGastosPorKm: 4,
+        seguroPorMes: 5000,
+        depreciacionPorMes: 0,
+        otroGastoEtiqueta: '',
+        otroGastoPorMes: 0,
+        kmPorMes: null,
       };
 }
 
@@ -51,6 +56,11 @@ function pintarConfigEnFormulario() {
   $('cfg-precio-combustible').value = config.precioPorGalon ?? 302.5;
   $('cfg-rendimiento').value = config.rendimientoKmPorGalon ?? '';
   $('cfg-otros-gastos').value = config.otrosGastosPorKm ?? '';
+  $('cfg-seguro').value = config.seguroPorMes ?? '';
+  $('cfg-depreciacion').value = config.depreciacionPorMes ?? '';
+  $('cfg-otro-gasto-etiqueta').value = config.otroGastoEtiqueta ?? '';
+  $('cfg-otro-gasto-monto').value = config.otroGastoPorMes ?? '';
+  $('cfg-km-mes').value = config.kmPorMes ?? '';
 
   const opcionCoincide = Array.from($('cfg-combustible').options).some(
     (o) => o.value !== 'custom' && parseFloat(o.value) === config.precioPorGalon,
@@ -96,6 +106,12 @@ $('btn-guardar-config').addEventListener('click', () => {
   const rendimientoRaw = parseFloat($('cfg-rendimiento').value);
   const rendimientoKmPorGalon = Number.isNaN(rendimientoRaw) || rendimientoRaw <= 0 ? null : rendimientoRaw;
   const otrosGastosPorKm = parseFloat($('cfg-otros-gastos').value) || 0;
+  const seguroPorMes = parseFloat($('cfg-seguro').value) || 0;
+  const depreciacionPorMes = parseFloat($('cfg-depreciacion').value) || 0;
+  const otroGastoEtiqueta = $('cfg-otro-gasto-etiqueta').value.trim();
+  const otroGastoPorMes = parseFloat($('cfg-otro-gasto-monto').value) || 0;
+  const kmMesRaw = parseFloat($('cfg-km-mes').value);
+  const kmPorMes = Number.isNaN(kmMesRaw) || kmMesRaw <= 0 ? null : kmMesRaw;
 
   const msg = $('config-msg');
   if (Number.isNaN(tarifaBase) || Number.isNaN(costoPorKm)) {
@@ -115,6 +131,11 @@ $('btn-guardar-config').addEventListener('click', () => {
     precioPorGalon,
     rendimientoKmPorGalon,
     otrosGastosPorKm,
+    seguroPorMes,
+    depreciacionPorMes,
+    otroGastoEtiqueta,
+    otroGastoPorMes,
+    kmPorMes,
   };
   guardarConfig(config);
   msg.textContent = 'Tarifa guardada.';
@@ -135,12 +156,13 @@ document.querySelectorAll('.tab').forEach((tab) => {
 });
 
 // --- Resultado ---
-function mostrarResultado({ km, minutos }) {
-  if (!tarifaConfigurada()) {
-    alert('Primero configurá tu tarifa (⚙️ arriba a la derecha).');
-    $('panel-config').classList.remove('hidden');
-    return null;
-  }
+let resultadoBase = null; // { km, minutosViaje } sin el tiempo de espera
+let tiempoEsperaMin = 0;
+
+function calcularYPintarResultado() {
+  if (!resultadoBase) return null;
+  const { km, minutosViaje } = resultadoBase;
+  const minutos = minutosViaje + tiempoEsperaMin;
 
   const r = calcularPrecio({
     km,
@@ -173,6 +195,12 @@ function mostrarResultado({ km, minutos }) {
       precioPorGalon: config.precioPorGalon,
       rendimientoKmPorGalon: config.rendimientoKmPorGalon,
       otrosGastosPorKm: config.otrosGastosPorKm,
+      gastosFijosPorKm: costoFijoPorKm({
+        seguroPorMes: config.seguroPorMes,
+        depreciacionPorMes: config.depreciacionPorMes,
+        otroGastoPorMes: config.otroGastoPorMes,
+        kmPorMes: config.kmPorMes,
+      }),
     });
     gastoOperativo = round2(gastoPorKm * km);
     real = calcularGananciaReal({ neto: r.neto, km, gastoOperativoPorKm: gastoPorKm });
@@ -190,6 +218,8 @@ function mostrarResultado({ km, minutos }) {
   ultimoResultado = {
     km,
     minutos,
+    minutosViaje,
+    tiempoEsperaMin,
     ...r,
     gastoOperativo,
     gananciaReal: real,
@@ -198,10 +228,32 @@ function mostrarResultado({ km, minutos }) {
   return ultimoResultado;
 }
 
+function mostrarResultado({ km, minutos }) {
+  if (!tarifaConfigurada()) {
+    alert('Primero configurá tu tarifa (⚙️ arriba a la derecha).');
+    $('panel-config').classList.remove('hidden');
+    return null;
+  }
+
+  resultadoBase = { km, minutosViaje: minutos };
+  tiempoEsperaMin = 0;
+  $('r-espera').value = '0';
+  $('r-espera-valor').textContent = '0 min';
+
+  return calcularYPintarResultado();
+}
+
+$('r-espera').addEventListener('input', () => {
+  tiempoEsperaMin = parseFloat($('r-espera').value) || 0;
+  $('r-espera-valor').textContent = `${tiempoEsperaMin} min`;
+  calcularYPintarResultado();
+});
+
 $('btn-guardar-viaje').addEventListener('click', () => {
   if (!ultimoResultado) return;
   guardarViaje(localStorage, ultimoResultado);
   ultimoResultado = null;
+  resultadoBase = null;
   $('panel-resultado').classList.add('hidden');
   pintarResumen();
 });

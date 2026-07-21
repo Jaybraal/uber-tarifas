@@ -26,11 +26,23 @@ export function calcularPrecio({
   return { precio, comision, neto };
 }
 
-export function costoOperativoPorKm({ precioPorGalon, rendimientoKmPorGalon, otrosGastosPorKm = 0 }) {
+export function costoOperativoPorKm({
+  precioPorGalon,
+  rendimientoKmPorGalon,
+  otrosGastosPorKm = 0,
+  gastosFijosPorKm = 0,
+}) {
   if (typeof rendimientoKmPorGalon !== 'number' || rendimientoKmPorGalon <= 0) {
     throw new Error('rendimientoKmPorGalon debe ser un numero > 0');
   }
-  return round2(precioPorGalon / rendimientoKmPorGalon + otrosGastosPorKm);
+  return round2(precioPorGalon / rendimientoKmPorGalon + otrosGastosPorKm + gastosFijosPorKm);
+}
+
+export function costoFijoPorKm({ seguroPorMes = 0, depreciacionPorMes = 0, otroGastoPorMes = 0, kmPorMes = 0 }) {
+  if (!kmPorMes || kmPorMes <= 0) {
+    return 0;
+  }
+  return round2((seguroPorMes + depreciacionPorMes + otroGastoPorMes) / kmPorMes);
 }
 
 export function gananciaReal({ neto, km, gastoOperativoPorKm }) {

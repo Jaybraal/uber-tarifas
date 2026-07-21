@@ -63,8 +63,8 @@
         sin A/C ni tráfico. También dejé RD$4/km en "otros gastos" como estimado de gomas,
         mantenimiento y limpieza. Son puntos de partida, no datos exactos: la próxima vez que
         llenes el tanque, dividí los km recorridos entre los galones que le echaste y poné ese
-        número acá para que sea preciso de verdad. Si esta app la usa otra persona, que
-        reemplace estos datos por los de su propio carro.
+        número acá para que sea preciso de verdad. Si esta app la usa otra persona (carro o
+        moto), que reemplace estos datos por los de su propio vehículo.
       </p>
       <div class="grid-2">
         <label>Marca y modelo (opcional)
@@ -85,11 +85,37 @@
         <label>Precio (RD$/galón)
           <input type="number" id="cfg-precio-combustible" min="0" step="0.01" inputmode="decimal" />
         </label>
-        <label>Rendimiento de tu carro (km/galón)
+        <label>Rendimiento de tu vehículo (km/galón)
           <input type="number" id="cfg-rendimiento" min="0" step="0.1" inputmode="decimal" placeholder="Ej. 40" />
         </label>
-        <label>Otros gastos por km (RD$, opcional)
-          <input type="number" id="cfg-otros-gastos" min="0" step="0.01" inputmode="decimal" placeholder="Mantenimiento, etc." />
+        <label>Mantenimiento y gomas por km (RD$, opcional)
+          <input type="number" id="cfg-otros-gastos" min="0" step="0.01" inputmode="decimal" placeholder="Ej. 4" />
+        </label>
+      </div>
+
+      <h2 class="section-title">Gastos fijos mensuales</h2>
+      <p class="hint">
+        Seguro, depreciación y cualquier otro gasto fijo (parqueo, cuota del carro, etc.) no
+        dependen de un viaje puntual, pero sí te los tenés que cobrar entre todos los km que
+        recorrés al mes. Metiendo cuánto recorrés al mes, la app los reparte solos en RD$/km y
+        los suma al gasto operativo. <strong>Si dejás "km por mes" en blanco, estos gastos
+        simplemente no se cuentan todavía</strong> — no se inventa el número.
+      </p>
+      <div class="grid-2">
+        <label>Seguro (RD$/mes)
+          <input type="number" id="cfg-seguro" min="0" step="0.01" inputmode="decimal" placeholder="Ej. 5000" />
+        </label>
+        <label>Depreciación (RD$/mes, opcional)
+          <input type="number" id="cfg-depreciacion" min="0" step="0.01" inputmode="decimal" placeholder="Ej. 3000" />
+        </label>
+        <label>Otro gasto — cuál (opcional)
+          <input type="text" id="cfg-otro-gasto-etiqueta" placeholder="Ej. Parqueo" autocomplete="off" />
+        </label>
+        <label>Otro gasto (RD$/mes, opcional)
+          <input type="number" id="cfg-otro-gasto-monto" min="0" step="0.01" inputmode="decimal" placeholder="Ej. 1000" />
+        </label>
+        <label>Km que recorrés al mes (para prorratear)
+          <input type="number" id="cfg-km-mes" min="0" step="1" inputmode="decimal" placeholder="Dejalo en blanco si no lo sabés" />
         </label>
       </div>
     </section>
@@ -154,13 +180,19 @@
 
     <section id="panel-resultado" class="card resultado hidden">
       <h2>Resultado</h2>
+      <label class="espera-label">¿Esperaste al pasajero? Sumale el tiempo
+        <div class="espera-control">
+          <input type="range" id="r-espera" min="0" max="60" step="1" value="0" />
+          <span id="r-espera-valor">0 min</span>
+        </div>
+      </label>
       <div class="resultado-grid">
         <div><small>Distancia</small><span id="r-km">-</span></div>
-        <div><small>Tiempo</small><span id="r-min">-</span></div>
+        <div><small>Tiempo (viaje + espera)</small><span id="r-min">-</span></div>
         <div class="destacado"><small>Precio a cobrarle al pasajero</small><span id="r-precio">-</span></div>
         <div id="r-comision-row" class="hidden"><small>Comisión de plataforma</small><span id="r-comision">-</span></div>
         <div id="r-neto-row" class="hidden"><small>Ganancia neta (sin gastos)</small><span id="r-neto">-</span></div>
-        <div id="r-gasto-row"><small>Gasto de combustible</small><span id="r-gasto">-</span></div>
+        <div id="r-gasto-row"><small>Gasto operativo total</small><span id="r-gasto">-</span></div>
         <div id="r-real-row"><small>Tu ganancia real</small><span id="r-real">-</span></div>
       </div>
       <button id="btn-guardar-viaje" class="btn-primary">Guardar viaje</button>

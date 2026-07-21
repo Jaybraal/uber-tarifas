@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { calcularPrecio, costoOperativoPorKm, gananciaReal } from './pricing.js';
+import { calcularPrecio, costoOperativoPorKm, costoFijoPorKm, gananciaReal } from './pricing.js';
 
 test('calcula precio base + costo por km', () => {
   const r = calcularPrecio({
@@ -101,4 +101,29 @@ test('gananciaReal resta el gasto operativo del neto', () => {
 test('gananciaReal no baja de negativo si el gasto supera el neto', () => {
   const g = gananciaReal({ neto: 20, km: 10, gastoOperativoPorKm: 7.56 });
   assert.equal(g, -55.6); // 20 - 75.6, se muestra en negativo a proposito: el viaje da perdida
+});
+
+test('costoFijoPorKm prorratea seguro + depreciacion + otro gasto entre los km del mes', () => {
+  const c = costoFijoPorKm({ seguroPorMes: 5000, depreciacionPorMes: 3000, otroGastoPorMes: 1000, kmPorMes: 1000 });
+  assert.equal(c, 9); // (5000+3000+1000)/1000
+});
+
+test('costoFijoPorKm da 0 si no hay kmPorMes (sin inventar el dato)', () => {
+  assert.equal(costoFijoPorKm({ seguroPorMes: 5000 }), 0);
+  assert.equal(costoFijoPorKm({ seguroPorMes: 5000, kmPorMes: 0 }), 0);
+});
+
+test('costoFijoPorKm funciona solo con seguro (los demas son opcionales)', () => {
+  const c = costoFijoPorKm({ seguroPorMes: 5000, kmPorMes: 2000 });
+  assert.equal(c, 2.5);
+});
+
+test('costoOperativoPorKm suma tambien los gastos fijos prorrateados por km', () => {
+  const c = costoOperativoPorKm({
+    precioPorGalon: 302.5,
+    rendimientoKmPorGalon: 40,
+    otrosGastosPorKm: 2,
+    gastosFijosPorKm: 3,
+  });
+  assert.equal(c, 12.56); // 7.5625 + 2 + 3 -> 12.5625 -> 12.56
 });

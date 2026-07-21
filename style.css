@@ -461,6 +461,58 @@ input.seleccionado {
   letter-spacing: 0.06em;
 }
 
+.espera-label {
+  margin-bottom: 16px;
+}
+
+.espera-control {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.espera-control input[type='range'] {
+  flex: 1;
+  min-width: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  outline: none;
+}
+
+.espera-control input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 4px 12px var(--accent-glow);
+  cursor: pointer;
+  border: 3px solid var(--bg);
+}
+
+.espera-control input[type='range']::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 4px 12px var(--accent-glow);
+  cursor: pointer;
+  border: 3px solid var(--bg);
+}
+
+.espera-control span {
+  min-width: 52px;
+  text-align: right;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--accent);
+}
+
 .resultado-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
