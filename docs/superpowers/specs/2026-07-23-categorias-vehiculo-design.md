@@ -22,11 +22,11 @@ Reemplaza los valores de ejemplo del usuario por cifras consistentes con los cam
 
 | id | label | icono | tarifaBase | costoPorKm | costoPorMinuto | tarifaMinima | precioPorGalon | rendimientoKmPorGalon | otrosGastosPorKm |
 |---|---|---|---|---|---|---|---|---|---|
-| `mototaxi` | Mototaxi / Delivery | 🏍️ | 50 | 25 | 3 | 60 | 302.50 (Gasolina Regular) | 144 | 1.50 |
-| `taxi` | Taxi / Sedán | 🚗 | 100 | 35 | 5 | 150 | 338.10 (Gasolina Premium) | 68 | 4.00 |
-| `van` | Van / Grupos | 🚐 | 250 | 65 | 10 | 300 | 254.80 (Gasoil Regular) | 30 | 9.00 |
+| `mototaxi` | Mototaxi / Delivery | 🏍️ | 10 | 25 | 3 | 60 | 302.50 (Gasolina Regular) | 144 | 1.50 |
+| `taxi` | Taxi / Sedán | 🚗 | 50 | 35 | 5 | 150 | 338.10 (Gasolina Premium) | 68 | 4.00 |
+| `van` | Van / Grupos | 🚐 | 75 | 65 | 10 | 300 | 254.80 (Gasoil Regular) | 30 | 9.00 |
 
-Todos son puntos de partida editables, mismo principio que el resto de la app (hint text lo aclara).
+Tarifa base ajustada 23/07/26 a pedido del usuario: arranca baja por categoría (10/50/75) y crece con km/minuto; la mínima es la que garantiza el piso real del viaje. Todos son puntos de partida editables, mismo principio que el resto de la app (hint text lo aclara).
 
 **Interfaz del módulo:**
 - `CATEGORIAS: Array<{id, label, icono, tarifaBase, costoPorKm, costoPorMinuto, tarifaMinima, precioPorGalon, rendimientoKmPorGalon, otrosGastosPorKm}>`

@@ -21,7 +21,12 @@ test('cada categoria trae todos los campos de tarifa y vehiculo', () => {
 test('presetPara devuelve la categoria pedida por id', () => {
   assert.equal(presetPara('mototaxi').id, 'mototaxi');
   assert.equal(presetPara('van').id, 'van');
-  assert.equal(presetPara('taxi').tarifaBase, 100);
+});
+
+test('la tarifa base arranca distinto segun la categoria: moto 10, taxi 50, van 75', () => {
+  assert.equal(presetPara('mototaxi').tarifaBase, 10);
+  assert.equal(presetPara('taxi').tarifaBase, 50);
+  assert.equal(presetPara('van').tarifaBase, 75);
 });
 
 test('presetPara cae a taxi si el id no existe (config vieja sin categoria)', () => {

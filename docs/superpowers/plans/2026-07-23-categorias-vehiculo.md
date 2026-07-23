@@ -67,7 +67,7 @@ test('cada categoria trae todos los campos de tarifa y vehiculo', () => {
 test('presetPara devuelve la categoria pedida por id', () => {
   assert.equal(presetPara('mototaxi').id, 'mototaxi');
   assert.equal(presetPara('van').id, 'van');
-  assert.equal(presetPara('taxi').tarifaBase, 100);
+  assert.equal(presetPara('taxi').tarifaBase, 50);
 });
 
 test('presetPara cae a taxi si el id no existe (config vieja sin categoria)', () => {
@@ -91,7 +91,7 @@ export const CATEGORIAS = [
     id: 'mototaxi',
     label: 'Mototaxi / Delivery',
     icono: '🏍️',
-    tarifaBase: 50,
+    tarifaBase: 10,
     costoPorKm: 25,
     costoPorMinuto: 3,
     tarifaMinima: 60,
@@ -103,7 +103,7 @@ export const CATEGORIAS = [
     id: 'taxi',
     label: 'Taxi / Sedán',
     icono: '🚗',
-    tarifaBase: 100,
+    tarifaBase: 50,
     costoPorKm: 35,
     costoPorMinuto: 5,
     tarifaMinima: 150,
@@ -115,7 +115,7 @@ export const CATEGORIAS = [
     id: 'van',
     label: 'Van / Grupos',
     icono: '🚐',
-    tarifaBase: 250,
+    tarifaBase: 75,
     costoPorKm: 65,
     costoPorMinuto: 10,
     tarifaMinima: 300,
