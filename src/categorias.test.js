@@ -29,6 +29,12 @@ test('la tarifa base arranca distinto segun la categoria: moto 10, taxi 50, van 
   assert.equal(presetPara('van').tarifaBase, 75);
 });
 
+test('la tarifa minima es igual a la tarifa base (sin piso extra por encima)', () => {
+  assert.equal(presetPara('mototaxi').tarifaMinima, 10);
+  assert.equal(presetPara('taxi').tarifaMinima, 50);
+  assert.equal(presetPara('van').tarifaMinima, 75);
+});
+
 test('presetPara cae a taxi si el id no existe (config vieja sin categoria)', () => {
   assert.equal(presetPara('bicicleta').id, 'taxi');
   assert.equal(presetPara(undefined).id, 'taxi');

@@ -94,7 +94,7 @@ export const CATEGORIAS = [
     tarifaBase: 10,
     costoPorKm: 25,
     costoPorMinuto: 3,
-    tarifaMinima: 60,
+    tarifaMinima: 10,
     precioPorGalon: 302.5, // Gasolina Regular
     rendimientoKmPorGalon: 144, // ~38 km/l
     otrosGastosPorKm: 1.5,
@@ -106,7 +106,7 @@ export const CATEGORIAS = [
     tarifaBase: 50,
     costoPorKm: 35,
     costoPorMinuto: 5,
-    tarifaMinima: 150,
+    tarifaMinima: 50,
     precioPorGalon: 338.1, // Gasolina Premium
     rendimientoKmPorGalon: 68, // ~18 km/l
     otrosGastosPorKm: 4,
@@ -118,7 +118,7 @@ export const CATEGORIAS = [
     tarifaBase: 75,
     costoPorKm: 65,
     costoPorMinuto: 10,
-    tarifaMinima: 300,
+    tarifaMinima: 75,
     precioPorGalon: 254.8, // Gasoil Regular
     rendimientoKmPorGalon: 30, // ~8 km/l
     otrosGastosPorKm: 9,
