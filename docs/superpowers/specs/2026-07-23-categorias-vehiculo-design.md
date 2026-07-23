@@ -22,11 +22,19 @@ Reemplaza los valores de ejemplo del usuario por cifras consistentes con los cam
 
 | id | label | icono | tarifaBase | costoPorKm | costoPorMinuto | tarifaMinima | precioPorGalon | rendimientoKmPorGalon | otrosGastosPorKm |
 |---|---|---|---|---|---|---|---|---|---|
-| `mototaxi` | Mototaxi / Delivery | 🏍️ | 10 | 25 | 3 | 10 | 302.50 (Gasolina Regular) | 144 | 1.50 |
-| `taxi` | Taxi / Sedán | 🚗 | 50 | 35 | 5 | 50 | 338.10 (Gasolina Premium) | 68 | 4.00 |
-| `van` | Van / Grupos | 🚐 | 75 | 65 | 10 | 75 | 254.80 (Gasoil Regular) | 30 | 9.00 |
+| `mototaxi` | Mototaxi / Delivery | 🏍️ | 10 | 10 | 1.5 | 10 | 302.50 (Gasolina Regular) | 144 | 1.50 |
+| `taxi` | Taxi / Sedán | 🚗 | 50 | 18 | 3 | 50 | 338.10 (Gasolina Premium) | 68 | 4.00 |
+| `van` | Van / Grupos | 🚐 | 75 | 30 | 5 | 75 | 254.80 (Gasoil Regular) | 30 | 9.00 |
 
-Tarifa base y mínima ajustadas 23/07/26 a pedido del usuario, en dos rondas: primero la base bajó a 10/50/75 (arranca baja y crece con km/minuto); después, como la mínima original (60/150/300) le seguía pareciendo alta, se igualó `tarifaMinima` a la misma `tarifaBase` — sin piso extra por encima del arranque, el precio final es simplemente base+km+minuto (nunca baja de la base, pero tampoco salta a un mínimo mayor). Todos son puntos de partida editables, mismo principio que el resto de la app (hint text lo aclara).
+Tarifa base y mínima ajustadas 23/07/26 a pedido del usuario, en dos rondas: primero la base bajó a 10/50/75 (arranca baja y crece con km/minuto); después, como la mínima original (60/150/300) le seguía pareciendo alta, se igualó `tarifaMinima` a la misma `tarifaBase` — sin piso extra por encima del arranque, el precio final es simplemente base+km+minuto (nunca baja de la base, pero tampoco salta a un mínimo mayor). Una tercera ronda bajó también `costoPorKm`/`costoPorMinuto` (moto 25→10 / 3→1.5, taxi 35→18 / 5→3, van 65→30 / 10→5) porque el precio subía demasiado rápido con la distancia/tiempo, en los 3 modos de cotización por igual (todos comparten el mismo `config` y `calcularPrecio`). Todos son puntos de partida editables, mismo principio que el resto de la app (hint text lo aclara).
+
+## Fix adicional: el mapa (Leaflet) no debe tumbar el cálculo del precio
+
+**Bug reportado por el usuario (23/07/26):** al cotizar por "Origen → Destino" en un celular real, apareció el error `"Can't find variable: L"` (Safari) y no se mostró ningún precio, aunque la ruta sí se había calculado bien.
+
+**Root cause (confirmado reproduciendo con Chrome headless + bloqueo del CDN de Leaflet vía CDP):** Leaflet (`L`) se carga desde `unpkg.com` con un `<script>` normal, que el service worker NO cachea a propósito (`sw.js` solo cachea same-origin). Con red inestable, ese script puede no llegar a cargar. `mostrarMapa()` usaba `L` sin ningún guard, y se llamaba ANTES que `mostrarResultado()` en el handler de "Calcular precio" — si `L` no existía, el `ReferenceError` interrumpía el handler completo y nunca se llegaba a mostrar el precio, pese a que `routeDistance()` ya había funcionado.
+
+**Fix:** (1) `mostrarMapa()` ahora hace `if (typeof L === 'undefined') return;` al inicio — sin mapa, sin drama. (2) En el handler, `mostrarResultado()` se llama ANTES de intentar `mostrarMapa()`, y esta última queda envuelta en su propio `try/catch` — el precio siempre se muestra si la ruta se pudo calcular, el mapa es puramente decorativo. Verificado reproduciendo el bug real (bloqueando el CDN de Leaflet por CDP) antes y después del fix.
 
 **Interfaz del módulo:**
 - `CATEGORIAS: Array<{id, label, icono, tarifaBase, costoPorKm, costoPorMinuto, tarifaMinima, precioPorGalon, rendimientoKmPorGalon, otrosGastosPorKm}>`

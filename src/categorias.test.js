@@ -35,6 +35,15 @@ test('la tarifa minima es igual a la tarifa base (sin piso extra por encima)', (
   assert.equal(presetPara('van').tarifaMinima, 75);
 });
 
+test('el costo por km y por minuto es mas bajo, para que el precio suba mas despacio', () => {
+  assert.equal(presetPara('mototaxi').costoPorKm, 10);
+  assert.equal(presetPara('mototaxi').costoPorMinuto, 1.5);
+  assert.equal(presetPara('taxi').costoPorKm, 18);
+  assert.equal(presetPara('taxi').costoPorMinuto, 3);
+  assert.equal(presetPara('van').costoPorKm, 30);
+  assert.equal(presetPara('van').costoPorMinuto, 5);
+});
+
 test('presetPara cae a taxi si el id no existe (config vieja sin categoria)', () => {
   assert.equal(presetPara('bicicleta').id, 'taxi');
   assert.equal(presetPara(undefined).id, 'taxi');
