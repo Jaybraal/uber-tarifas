@@ -495,6 +495,13 @@ $('btn-usar-ubicacion').addEventListener('click', () => {
 });
 
 function mostrarMapa(origen, destino, geometry) {
+  if (typeof L === 'undefined') {
+    // Leaflet se carga desde un CDN externo que el service worker no cachea
+    // (a proposito, ver sw.js) — con red inestable puede no llegar a cargar.
+    // El mapa es solo visual: si no esta disponible, no debe tumbar el
+    // calculo del precio, que ya se hizo con exito antes de llegar aca.
+    return;
+  }
   const el = $('mapa-ruta');
   el.classList.remove('hidden');
 
@@ -541,8 +548,14 @@ $('btn-ruta-calcular').addEventListener('click', async () => {
     const { km, minutos, geometry } = await routeDistance(origenSeleccionado, destinoSeleccionado);
     msg.textContent = `${km.toFixed(1)} km, ${Math.round(minutos)} min de recorrido`;
     msg.className = 'msg ok';
-    mostrarMapa(origenSeleccionado, destinoSeleccionado, geometry);
+    // El precio se muestra primero: si algo del mapa (Leaflet) falla despues,
+    // el conductor ya tiene su precio, que es lo que de verdad necesita.
     mostrarResultado({ km, minutos });
+    try {
+      mostrarMapa(origenSeleccionado, destinoSeleccionado, geometry);
+    } catch {
+      // El mapa es solo visual; un fallo aca nunca debe ocultar el precio ya mostrado arriba.
+    }
   } catch (err) {
     msg.textContent = err.message || 'No se pudo calcular la ruta.';
     msg.className = 'msg error';
