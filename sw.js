@@ -1,4 +1,4 @@
-const CACHE = 'uber-tarifas-v1';
+const CACHE = 'uber-tarifas-v2';
 const APP_SHELL = [
   './',
   './index.html',
@@ -9,6 +9,8 @@ const APP_SHELL = [
   './src/distance.js',
   './src/tripStore.js',
   './src/geocode.js',
+  './src/categorias.js',
+  './src/whatsapp.js',
   './public/icons/icon-192.png',
   './public/icons/icon-512.png',
 ];

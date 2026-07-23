@@ -2,6 +2,8 @@ import { calcularPrecio, costoOperativoPorKm, costoFijoPorKm, gananciaReal as ca
 import { TripTracker } from './src/distance.js';
 import { guardarViaje, resumenDeHoy, borrarViajes } from './src/tripStore.js';
 import { buscarSugerencias, reverseGeocode, routeDistance } from './src/geocode.js';
+import { CATEGORIAS, presetPara } from './src/categorias.js';
+import { mensajeCotizacion } from './src/whatsapp.js';
 
 const CONFIG_KEY = 'uber-tarifas:config';
 const $ = (id) => document.getElementById(id);
@@ -20,6 +22,7 @@ function cargarConfig() {
         // distancia recorrida, no del tiempo parado en trafico) y se agrega un
         // rubro explicito de mantenimiento por km para que la ganancia real lo
         // refleje, no solo el combustible.
+        categoria: 'taxi',
         vehiculo: 'Honda Fit Hybrid',
         placa: '',
         tarifaBase: 60,
@@ -75,6 +78,43 @@ $('cfg-combustible').addEventListener('change', () => {
   }
 });
 
+function pintarSelectorCategoria(containerId) {
+  const cont = $(containerId);
+  cont.innerHTML = CATEGORIAS.map(
+    (c) => `<button class="cat-tab" data-cat="${c.id}" type="button" role="tab"><span class="cat-icon">${c.icono}</span>${c.label}</button>`,
+  ).join('');
+  cont.querySelectorAll('.cat-tab').forEach((btn) => {
+    btn.addEventListener('click', () => seleccionarCategoria(btn.dataset.cat));
+  });
+}
+
+function pintarActivoCategoria() {
+  document.querySelectorAll('.cat-tab').forEach((btn) => {
+    btn.classList.toggle('active', btn.dataset.cat === config.categoria);
+  });
+}
+
+function seleccionarCategoria(id) {
+  const preset = presetPara(id);
+  config = {
+    ...config,
+    categoria: preset.id,
+    tarifaBase: preset.tarifaBase,
+    costoPorKm: preset.costoPorKm,
+    costoPorMinuto: preset.costoPorMinuto,
+    tarifaMinima: preset.tarifaMinima,
+    precioPorGalon: preset.precioPorGalon,
+    rendimientoKmPorGalon: preset.rendimientoKmPorGalon,
+    otrosGastosPorKm: preset.otrosGastosPorKm,
+  };
+  guardarConfig(config);
+  pintarConfigEnFormulario();
+  pintarActivoCategoria();
+  if (resultadoBase) {
+    calcularYPintarResultado();
+  }
+}
+
 function formatoRD(n) {
   return `RD$${n.toFixed(2)}`;
 }
@@ -93,6 +133,9 @@ $('btn-config').addEventListener('click', () => {
 });
 
 pintarConfigEnFormulario();
+pintarSelectorCategoria('cat-tabs-config');
+pintarSelectorCategoria('cat-tabs-quick');
+pintarActivoCategoria();
 
 $('btn-guardar-config').addEventListener('click', () => {
   const vehiculo = $('cfg-vehiculo').value.trim();
@@ -121,6 +164,7 @@ $('btn-guardar-config').addEventListener('click', () => {
   }
 
   config = {
+    categoria: config.categoria,
     vehiculo,
     placa,
     tarifaBase,
@@ -263,6 +307,15 @@ $('btn-guardar-viaje').addEventListener('click', () => {
   resetearBotonDescartar();
   $('panel-resultado').classList.add('hidden');
   pintarResumen();
+});
+
+$('btn-whatsapp').addEventListener('click', () => {
+  if (!ultimoResultado) return;
+  const categoriaLabel = presetPara(config.categoria).label;
+  const origen = $('ruta-origen').value.trim() || null;
+  const destino = $('ruta-destino').value.trim() || null;
+  const mensaje = mensajeCotizacion({ origen, destino, categoriaLabel, monto: ultimoResultado.precio });
+  window.open(`https://wa.me/?text=${encodeURIComponent(mensaje)}`, '_blank');
 });
 
 let descartarTimeout = null;
@@ -508,13 +561,17 @@ function refrescarLive() {
   $('gps-km').textContent = km.toFixed(2);
   $('gps-min').textContent = minutos.toFixed(1);
   if (tarifaConfigurada()) {
+    // Sin tarifaMinima a proposito: el contador en vivo debe crecer desde la
+    // tarifa base junto con el km/tiempo real, no saltar de una vez al piso
+    // minimo apenas arranca el viaje (con km=0 estaria por debajo del minimo
+    // y calcularPrecio aplicaria el piso). El minimo real se sigue cobrando
+    // al finalizar el viaje, en calcularYPintarResultado() que si lo pasa.
     const r = calcularPrecio({
       km,
       minutos,
       tarifaBase: config.tarifaBase,
       costoPorKm: config.costoPorKm,
       costoPorMinuto: config.costoPorMinuto,
-      tarifaMinima: config.tarifaMinima,
       comisionPct: config.comisionPct,
     });
     $('gps-precio').textContent = formatoRD(r.precio);
